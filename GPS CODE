@@ -24,26 +24,26 @@ using namespace std;
 
 
 
-#define port_name_gps "/dev/ttyUSB0"
+#define port_name_gps "/dev/ttyUSB0"//address of gps 
 
 
-QByteArray gps_1;
+QByteArray gps_1;// arrays for gps values
 QByteArray gps_lat;
 QByteArray gps_long;
-QByteArray slan="43.795665",slong="-79.335346";
+QByteArray slan="43.795665",slong="-79.335346";//reference gps co ordiates
 const char *lat_gps;
 const char *long_gps;
-double lattitude,longitude;
-int la,lo;
+double lattitude,longitude;//for long double number
+int la,lo;//initializing latitude,longitude
 
-int buzzerpin=0;
+int buzzerpin=0;//initializing pi for rf
 int lowpin=25;
-int pinstatus;
+int pinstatus;//intial buzzer pin value is 0
 
 QString latistatus;
 QString longistatus;
 
-class SleeperThread : public QThread
+class SleeperThread : public QThread//time delay function
 {
 public:
     static void msleep(unsigned long msecs)
@@ -57,8 +57,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-    wiringPiSetup();
+    ui->setupUi(this);//setting up ui
+    wiringPiSetup();// setting up wiring pi
 
 
 
@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
     pinMode(buzzerpin,OUTPUT);
     digitalWrite(buzzerpin,0);
 
-    open_port_gps();
+    open_port_gps();//open gps port for access prototype
 
 
     QSqlDatabase db=QSqlDatabase::addDatabase("QMYSQL");
@@ -108,11 +108,11 @@ void MainWindow::sleepFor(qint64 milliseconds)
 
 /******************************** GPS FUNCTIONS **********************************/
 
-void MainWindow::open_port_gps()
+void MainWindow::open_port_gps()//open gps port
 {
     qDebug()<<"GPS  Port OPEN";
-    this->portgps = new QextSerialPort(port_name_gps, QextSerialPort::EventDriven);
-    portgps->flush();
+    this->portgps = new QextSerialPort(port_name_gps, QextSerialPort::EventDriven);//access serial port
+    portgps->flush();//set parameters for gps co ordinates.
     portgps->setBaudRate(BAUD9600);
     portgps->setFlowControl(FLOW_OFF);
     portgps->setParity(PAR_NONE);
@@ -127,13 +127,13 @@ void MainWindow::open_port_gps()
         QMessageBox::information(this, "SYSTEM ERROR "," Attempt to open a non-existent port");
     }
 }
-void MainWindow::close_port_gps()
+void MainWindow::close_port_gps()//close if there is an error
 {
     portgps->close();
     qDebug()<<"GPS Port Close";
 }
 
-void MainWindow::onReadyRead_gps()
+void MainWindow::onReadyRead_gps()//read gps function
 {
     SleeperThread::msleep(2000);
     QByteArray bytes= portgps->readAll();
