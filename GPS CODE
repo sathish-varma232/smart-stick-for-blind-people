@@ -1,0 +1,292 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include <QString>
+#include <QDebug>
+#include <QThread>
+#include <QCoreApplication>
+#include <QTime>
+#include <QDateTime>
+#include <QFileDialog>
+#include <stdlib.h>
+#include <QList>
+#include <QFile>
+#include <QStringList>
+#include "qextserialport.h"
+#include <wiringPi.h>
+#include <QProcess>
+#include <QtSql/QSqlError>
+#include <QtSql/QtSql>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlDatabase>
+
+using namespace std;
+
+
+
+
+#define port_name_gps "/dev/ttyUSB0"
+
+
+QByteArray gps_1;
+QByteArray gps_lat;
+QByteArray gps_long;
+QByteArray slan="43.795665",slong="-79.335346";
+const char *lat_gps;
+const char *long_gps;
+double lattitude,longitude;
+int la,lo;
+
+int buzzerpin=0;
+int lowpin=25;
+int pinstatus;
+
+QString latistatus;
+QString longistatus;
+
+class SleeperThread : public QThread
+{
+public:
+    static void msleep(unsigned long msecs)
+    {
+        QThread::msleep(msecs);
+    }
+};
+
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+    wiringPiSetup();
+
+
+
+    pinMode(lowpin,INPUT);
+    pullUpDnControl(lowpin,PUD_UP);
+    pinMode(buzzerpin,OUTPUT);
+    digitalWrite(buzzerpin,0);
+
+    open_port_gps();
+
+
+    QSqlDatabase db=QSqlDatabase::addDatabase("QMYSQL");
+        db.setHostName("www.microembeddedtech.com");
+        db.setPort(3306);
+        db.setDatabaseName("ictrlinn_microembdb");
+        db.setUserName("ictrlinn_microst");
+        db.setPassword("microemb@1411");
+    if (!db.open())
+    {
+        qDebug() << "Database error occurred"<<db.lastError();
+    }
+    else
+    {
+        qDebug()<<"Database connected";
+    }
+
+    pinscanTimer=new QTimer(this);
+    connect(pinscanTimer,SIGNAL (timeout()),this,SLOT(pinstatusscan()));
+    pinscanTimer->start(500);
+
+
+
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+void MainWindow::sleepFor(qint64 milliseconds)
+{
+    qint64 timeToExitFunction = QDateTime::currentMSecsSinceEpoch()+milliseconds;
+    while(timeToExitFunction>QDateTime::currentMSecsSinceEpoch())
+    {
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    }
+}
+
+/******************************** GPS FUNCTIONS **********************************/
+
+void MainWindow::open_port_gps()
+{
+    qDebug()<<"GPS  Port OPEN";
+    this->portgps = new QextSerialPort(port_name_gps, QextSerialPort::EventDriven);
+    portgps->flush();
+    portgps->setBaudRate(BAUD9600);
+    portgps->setFlowControl(FLOW_OFF);
+    portgps->setParity(PAR_NONE);
+    portgps->setDataBits(DATA_8);
+    portgps->setStopBits(STOP_1);
+    if (portgps->open(QIODevice::ReadWrite) == true)
+    {
+        connect(portgps,SIGNAL(readyRead()),this,SLOT(onReadyRead_gps()));
+    }
+    else
+    {
+        QMessageBox::information(this, "SYSTEM ERROR "," Attempt to open a non-existent port");
+    }
+}
+void MainWindow::close_port_gps()
+{
+    portgps->close();
+    qDebug()<<"GPS Port Close";
+}
+
+void MainWindow::onReadyRead_gps()
+{
+    SleeperThread::msleep(2000);
+    QByteArray bytes= portgps->readAll();
+    qDebug()<<bytes;
+    for (int i = 0; i < bytes.size(); ++i)
+
+    {
+
+        if(bytes.at(i) == '$' && bytes.at(i+1) == 'G' && bytes.at(i+2) == 'P'  && bytes.at(i+3) == 'N'&& bytes.at(i+4) == 'M'&& bytes.at(i+5) == 'C')
+        {
+
+            qDebug() <<" GPRMS ENTER";
+            gps_1[0]=bytes.at(i);
+            gps_1[1]=bytes.at(i+1);
+            gps_1[2]=bytes.at(i+2);
+            gps_1[3]=bytes.at(i+3);
+            gps_1[4]=bytes.at(i+4);
+            gps_1[5]=bytes.at(i+5);
+            gps_1[6]=bytes.at(i+6);
+            gps_1[7]=bytes.at(i+7);
+            gps_1[8]=bytes.at(i+8);
+            gps_1[9]=bytes.at(i+9);
+            gps_1[10]=bytes.at(i+10);
+            gps_1[11]=bytes.at(i+11);
+            gps_1[12]=bytes.at(i+12);
+            gps_1[13]=bytes.at(i+13);
+            gps_1[14]=bytes.at(i+14);
+            gps_1[15]=bytes.at(i+15);
+            gps_1[16]=bytes.at(i+16);
+            gps_1[17]=bytes.at(i+17);
+            gps_1[18]=bytes.at(i+18);
+            gps_1[19]=bytes.at(i+19);
+            gps_1[20]=bytes.at(i+20);
+            gps_1[21]=bytes.at(i+21);
+            gps_1[22]=bytes.at(i+22);
+            gps_1[23]=bytes.at(i+23);
+            gps_1[24]=bytes.at(i+24);
+            gps_1[25]=bytes.at(i+25);
+            gps_1[26]=bytes.at(i+26);
+            gps_1[27]=bytes.at(i+27);
+            gps_1[28]=bytes.at(i+28);
+            gps_1[29]=bytes.at(i+29);
+            gps_1[30]=bytes.at(i+30);
+            gps_1[30]=bytes.at(i+30);
+            gps_1[31]=bytes.at(i+31);
+            gps_1[32]=bytes.at(i+32);
+            gps_1[33]=bytes.at(i+33);
+            gps_1[34]=bytes.at(i+34);
+            gps_1[35]=bytes.at(i+35);
+            gps_1[36]=bytes.at(i+36);
+            gps_1[37]=bytes.at(i+37);
+            gps_1[38]=bytes.at(i+38);
+            gps_1[39]=bytes.at(i+39);
+            gps_1[40]=bytes.at(i+40);
+            gps_1[41]=bytes.at(i+41);
+            gps_1[42]=bytes.at(i+42);
+            gps_1[43]=bytes.at(i+43);
+            i=bytes.size()+1;
+
+        }
+
+    }
+
+    /*********************************Latitude*****************************/
+    gps_lat[0]= gps_1[20];
+    gps_lat[1]= gps_1[21];
+    gps_lat[2]= gps_1[22];
+    gps_lat[3]= gps_1[23];
+    gps_lat[4]= gps_1[24];
+    gps_lat[5]= gps_1[25];
+    gps_lat[6]= gps_1[26];
+    gps_lat[7]= gps_1[27];
+    gps_lat[8]= gps_1[28];
+
+    /*********************************Longitude*****************************/
+
+    gps_long[0] = gps_1[33];
+    gps_long[1] = gps_1[34];
+    gps_long[2] = gps_1[35];
+    gps_long[3] = gps_1[36];
+    gps_long[4] = gps_1[37];
+    gps_long[5] = gps_1[38];
+    gps_long[6] = gps_1[39];
+    gps_long[7] = gps_1[40];
+    gps_long[8] = gps_1[41];
+
+    gps_lat[4]=gps_lat.at(5);
+    gps_lat[5]=gps_lat.at(6);
+    gps_lat[6]=gps_lat.at(7);
+    gps_lat[7]=gps_lat.at(8);
+    //  qDebug() << "Lat" << gps_lat;
+    lat_gps=gps_lat.data();
+
+    gps_long[4]=gps_long.at(5);
+    gps_long[5]=gps_long.at(6);
+    gps_long[6]=gps_long.at(7);
+    gps_long[7]=gps_long.at(8);
+    long_gps=gps_long.data();
+
+    int lat,lon,a,b,e,f;
+    double c,d;
+    lat=atof(lat_gps);
+    lat/=10;
+    //   qDebug()<<lat;
+    lon=atof(long_gps);
+    lon/=10;
+    //    qDebug()<<lon;
+    e=lat/1000000;
+    f=lon/1000000;
+    a=lat%1000000;
+    b=lon%1000000;
+    // qDebug()<<a<<"  "<<b;
+    //  qDebug()<<e<<"  "<<f;
+    c=((a/10000.0)/60);
+    d=((b/10000.0)/60);
+    // qDebug()<<c<<"  "<<d;
+    c=c+e;
+    d=d+f;
+    lattitude=c;
+    longitude=d;
+    //  qDebug()<<c<<"  "<<d;
+    //  qDebug()<<"LAT"<<lattitude<<"LONG:"<<longitude;
+
+    slan=QByteArray::number(lattitude);
+    slong=QByteArray::number(longitude);
+    qDebug()<<"SLAN"<<slan<<"SLONG"<<slong;
+
+    latistatus =  QString(slan);
+    longistatus = QString(slong);
+
+    qDebug() << " STRING LATI:" << latistatus;
+    qDebug() << " STRING LONGI:" << longistatus;
+
+}
+
+void MainWindow::pinstatusscan()
+{
+    pinstatus=digitalRead(lowpin);
+    qDebug() << " PIN STATUS VALUE:" << pinstatus;
+
+    if(pinstatus==0){
+
+       digitalWrite(buzzerpin,1);
+    }
+    else {
+
+        digitalWrite(buzzerpin,0);
+    }
+
+   QSqlQuery squery;
+   squery.exec("UPDATE krestgpslocation SET latitude='"+latistatus+"', longitude='"+longistatus+"' WHERE sno=1");
+}
+
+
+
+/************************** END GPS FUNCTIONS ******************************************/
