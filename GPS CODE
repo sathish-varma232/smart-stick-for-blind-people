@@ -283,10 +283,7 @@ void MainWindow::pinstatusscan()
         digitalWrite(buzzerpin,0);
     }
 
-   QSqlQuery squery;
-   squery.exec("UPDATE krestgpslocation SET latitude='"+latistatus+"', longitude='"+longistatus+"' WHERE sno=1");
-}
-
+   
 
 
 /************************** END GPS FUNCTIONS ******************************************/
