@@ -1,0 +1,20 @@
+QSqlDatabase db=QSqlDatabase::addDatabase("QMYSQL");
+        db.setHostName("www.amazonwebservices.com");
+        db.setPort(3306);
+        db.setDatabaseName("ictrlinn_microembdb");
+        db.setUserName("ictrlinn_microst");
+        db.setPassword("microemb@1411");
+    if (!db.open())
+    {
+        qDebug() << "Database error occurred"<<db.lastError();
+    }
+    else
+    {
+        qDebug()<<"Database connected";
+    }
+void Main ()
+{
+QsqlQueery squery;
+squery.exec("UPDATE gpslocation SET latitude="'+latistatus+"',longitude="'+longistatus+"'WHERE sno=1");
+}
+
