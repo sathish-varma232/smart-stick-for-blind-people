@@ -1,0 +1,29 @@
+int buzzerpin=0;//initializing pi for rf
+int lowpin=25;
+int pinstatus;//intial buzzer pin value is 0
+
+class SleeperThread : public QThread//time delay function
+{
+public:
+    static void msleep(unsigned long msecs)
+    {
+        QThread::msleep(msecs);
+    }
+};
+ pinscanTimer=new QTimer(this);
+    connect(pinscanTimer,SIGNAL (timeout()),this,SLOT(pinstatusscan()));
+    pinscanTimer->start(500);
+
+void MainWindow::pinstatusscan()
+{
+    pinstatus=digitalRead(lowpin);
+    qDebug() << " PIN STATUS VALUE:" << pinstatus;
+
+    if(pinstatus==0){
+
+       digitalWrite(buzzerpin,1);
+    }
+    else {
+
+        digitalWrite(buzzerpin,0);
+    }
