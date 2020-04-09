@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     QSqlDatabase db=QSqlDatabase::addDatabase("QMYSQL");
-        db.setHostName("www.microembeddedtech.com");
+        db.setHostName("www.amazonwebservices.com");
         db.setPort(3306);
         db.setDatabaseName("ictrlinn_microembdb");
         db.setUserName("ictrlinn_microst");
