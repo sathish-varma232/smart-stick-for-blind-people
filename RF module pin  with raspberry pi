@@ -1,0 +1,6 @@
+RF transmitter data pin  is connected to GPIO 17 of raspberry pi 3.
+RF transmitter vcc  pin is connected to raspberry pi 5v
+RF transmitter  ground pin is connected to raspberry pi GND
+RF Receiver data pin is connecetd to GPIO 27 of raspberry pi 3
+RF Receiver vcc  is connected to the 5v
+RF Receiver ground is connected to the GND of raspberry pi 3

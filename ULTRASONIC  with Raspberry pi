@@ -1,0 +1,5 @@
+VCC pin of ultrasonic sensor is connected to 5v pin of raspberry pi 3
+GND pin of sensor is connected to GND pin of raspberry pi
+Trigger terminal pin of sensor is connected to gpio of raspberry pi.
+Echo pin of sensor is connected with resistor and connected to GPIO 2nd pin
+
