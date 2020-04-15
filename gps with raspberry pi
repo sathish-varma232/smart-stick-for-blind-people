@@ -1,0 +1,3 @@
+VCC pin of GPS module is connected to 5v pin of raspberry pi 3
+GND pin of GPS module is connected to GND of raspberry pi 3
+data pin of GPS module is connected to GPIO 16 of raspberry pi 3
