@@ -33,10 +33,10 @@ QByteArray gps_long;
 QByteArray slan="43.795665",slong="-79.335346";//reference gps co ordiates
 const char *lat_gps;
 const char *long_gps;
-double lattitude,longitude;//for long double number
-int la,lo;//initializing latitude,longitude
+double lattitude,longitude;       // lattitude and longitude as double
+int la,lo;                        // integers
 
-int buzzerpin=0;//initializing pi for rf
+int buzzerpin=0;  // integers
 int lowpin=25;
 int pinstatus;//intial buzzer pin value is 0
 
@@ -70,12 +70,17 @@ MainWindow::MainWindow(QWidget *parent) :
     open_port_gps();//open gps port for access prototype
 
 
+// database connection
+
     QSqlDatabase db=QSqlDatabase::addDatabase("QMYSQL");
         db.setHostName("www.amazonwebservices.com");
         db.setPort(3306);
         db.setDatabaseName("ictrlinn_microembdb");
         db.setUserName("ictrlinn_microst");
         db.setPassword("microemb@1411");
+    
+    // if statement for checking database connection
+    
     if (!db.open())
     {
         qDebug() << "Database error occurred"<<db.lastError();
@@ -118,6 +123,9 @@ void MainWindow::open_port_gps()//open gps port
     portgps->setParity(PAR_NONE);
     portgps->setDataBits(DATA_8);
     portgps->setStopBits(STOP_1);
+    
+    // connecting gps 
+    
     if (portgps->open(QIODevice::ReadWrite) == true)
     {
         connect(portgps,SIGNAL(readyRead()),this,SLOT(onReadyRead_gps()));
@@ -132,6 +140,8 @@ void MainWindow::close_port_gps()//close if there is an error
     portgps->close();
     qDebug()<<"GPS Port Close";
 }
+
+// readig gps value
 
 void MainWindow::onReadyRead_gps()//read gps function
 {
@@ -219,7 +229,6 @@ void MainWindow::onReadyRead_gps()//read gps function
     gps_long[6] = gps_1[39];
     gps_long[7] = gps_1[40];
     gps_long[8] = gps_1[41];
-
     gps_lat[4]=gps_lat.at(5);
     gps_lat[5]=gps_lat.at(6);
     gps_lat[6]=gps_lat.at(7);
@@ -264,8 +273,8 @@ void MainWindow::onReadyRead_gps()//read gps function
     latistatus =  QString(slan);
     longistatus = QString(slong);
 
-    qDebug() << " STRING LATI:" << latistatus;
-    qDebug() << " STRING LONGI:" << longistatus;
+    qDebug() << " STRING LATI:" << latistatus;  // prints the value
+    qDebug() << " STRING LONGI:" << longistatus; // prints the value
 
 }
 
@@ -276,11 +285,11 @@ void MainWindow::pinstatusscan()
 
     if(pinstatus==0){
 
-       digitalWrite(buzzerpin,1);
+       digitalWrite(buzzerpin,1);   // buzzer on
     }
     else {
 
-        digitalWrite(buzzerpin,0);
+        digitalWrite(buzzerpin,0);  // buzzer off
     }
 
    
