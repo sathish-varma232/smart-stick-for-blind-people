@@ -4,8 +4,8 @@
 
 using namespace std;
 
-int trigger = 1;
-int echo = 0;
+int trigger = 1; // integer
+int echo = 0; // integer
 
 int main()
 {
@@ -13,9 +13,9 @@ if (wiringPiSetup() == -1)
 return -1;
 
 Sonar sonar;
-sonar.init(trigger, echo);
+sonar.init(trigger, echo);    // initializes trigger 
 
 while(1){
-cout << "Distance is " << sonar.distance(30000) << " cm." << endl;
+cout << "Distance is " << sonar.distance(30000) << " cm." << endl;   // displays on raspberry pi terminal
 }
 }
